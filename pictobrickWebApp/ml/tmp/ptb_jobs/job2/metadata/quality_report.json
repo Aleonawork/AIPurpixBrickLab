@@ -1,0 +1,21 @@
+{
+  "job_id": "job2",
+  "settings": {
+    "fps": 2.0,
+    "max_video_frames": 400,
+    "min_sharpness": 80.0,
+    "min_brightness": 0.12,
+    "max_brightness": 0.88,
+    "max_clip_high": 0.02,
+    "max_clip_low": 0.02,
+    "dedupe_phash_size": 16,
+    "dedupe_hamming_threshold": 6
+  },
+  "counts": {
+    "total_frames_found": 19,
+    "kept_after_quality": 18,
+    "dropped_after_quality": 1,
+    "removed_by_dedupe": 0,
+    "final_kept": 18
+  }
+}

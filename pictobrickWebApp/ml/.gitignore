@@ -1,0 +1,44 @@
+# --- ML job artifacts / scratch ---
+ml/tmp/
+ml/data/
+ml/output/
+ml/outputs/
+ml/runs/
+ml/logs/
+ml/jobs/
+
+
+# --- Virtual environments ---
+ml/.venv/
+.venv/
+
+# --- Python cache / compiled ---
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+
+# --- Test / tooling caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# --- Coverage ---
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Build artifacts ---
+dist/
+build/
+*.egg-info/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- OS junk ---
+.DS_Store
+
+
+.vscode/*
+!.vscode/settings.json

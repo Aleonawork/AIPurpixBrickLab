@@ -1,0 +1,18 @@
+{
+  "job_id": "test123",
+  "frames": [
+    {
+      "id": "frame_000001",
+      "path": "frames/frame_000001.jpg",
+      "width": 1,
+      "height": 1,
+      "timestamp_ms": null,
+      "sharpness": null,
+      "exposure": null,
+      "intrinsics": null,
+      "intrinsics_conf": null,
+      "mask_path": null
+    }
+  ],
+  "dropped_frames": []
+}
