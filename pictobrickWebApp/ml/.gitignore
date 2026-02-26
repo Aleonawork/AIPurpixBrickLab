@@ -6,7 +6,7 @@ ml/outputs/
 ml/runs/
 ml/logs/
 ml/jobs/
-
+.python-version
 
 # --- Virtual environments ---
 ml/.venv/
@@ -42,3 +42,12 @@ build/
 
 .vscode/*
 !.vscode/settings.json
+
+
+# --- Environment variables ---
+.env
+.env.local
+.env.prod
+.env.development
+!.env.example
+
