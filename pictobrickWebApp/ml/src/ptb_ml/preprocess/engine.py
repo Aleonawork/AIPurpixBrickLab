@@ -79,12 +79,12 @@ def run_preprocess(req:PreprocessReq) -> PreprocessResult:
                 width=w,
                 height=h,
                 sharpness=m.sharpness,
-                brightness=m.brightness
+                exposure=m.brightness
             )
         )
 
     dropped_records: list[DroppedRec] = []
-    for p, reason, m in dropped_records:
+    for p, reason, m in dropped_scored:
         dropped_records.append(
             DroppedRec(
                 path=str(p.relative_to(ws.root)),
