@@ -31,7 +31,7 @@ export default function HomePage() {
           <Link href="#how-it-works" className="hover:text-[#004b87] transition-colors">How it Works</Link>
           <Link href="#gallery" className="hover:text-[#004b87] transition-colors">Gallery</Link>
         </div>
-        <Link href="/pro">
+        <Link href="/create">
           <button className="flex items-center gap-2 bg-white border border-slate-200 text-[#004b87] px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm hover:bg-slate-50 hover:shadow-md">
             Launch Workspace <ArrowUpRight className="w-4 h-4" />
           </button>
@@ -68,7 +68,7 @@ export default function HomePage() {
             </motion.p>
             
             <motion.div variants={fadeUp} className="flex items-center gap-4 pt-4">
-              <Link href="/pro">
+              <Link href="/create">
                 <button className="flex items-center gap-2 bg-[#f57c00] hover:bg-orange-600 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-lg shadow-orange-500/20 hover:-translate-y-1">
                   Open Studio <ArrowRight className="w-5 h-5" />
                 </button>
