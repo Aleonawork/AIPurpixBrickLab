@@ -60,4 +60,5 @@ ml/tmp/
 # --- Next.js ---
 frontend/.next/
 frontend/out/
-frontend/node_modules/frontend/public/models/VHSTV
+frontend/node_modules/
+.DS_Store
