@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PictoBrick Frontend
 
-## Getting Started
+Next.js 16 app (App Router) using React 19, Tailwind v4, shadcn/ui, and Clerk for authentication.
 
-First, run the development server:
+> For monorepo-wide setup, see the [top-level README](../../README.md). This file covers frontend-specific dev.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Directory Structure
+
+```
+frontend/
+├── app/                       # App Router pages
+│   ├── page.tsx               # homepage (hero + "Live Rendering" preview)
+│   ├── layout.tsx             # root layout, ClerkProvider lives here
+│   ├── create/                # photo-upload → generate-layout studio
+│   ├── my-builds/             # signed-in users: their past builds (auth-gated)
+│   ├── gallery/               # community showcase (placeholder data)
+│   ├── pricing/
+│   ├── faq/
+│   └── ...
+├── components/
+│   ├── Navbar.tsx             # global nav; swaps between signed-in / signed-out state
+│   ├── ui/                    # shadcn primitives (button, card, ...)
+│   └── ...
+├── lib/                       # small helpers (cn, etc.)
+├── public/                    # static assets served from web root (/logo.png, /viewer.js, ...)
+├── middleware.ts              # Clerk auth — protects /my-builds
+├── Dockerfile.frontend        # multi-stage build consumed by compose.yaml
+└── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Running (Preferred: Docker)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+From the repo root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd pictobrickWebApp
+docker compose up --build
+```
 
-## Learn More
+This builds the image (Node 22 base, standalone Next output) and runs alongside Postgres + Redis. App lives at <http://localhost:3000>.
 
-To learn more about Next.js, take a look at the following resources:
+The publishable Clerk key is baked into `compose.yaml`. The secret key comes from `pictobrickWebApp/.env.local` (see top-level README).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Running (Local, No Docker)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you want hot reload without Docker:
 
-## Deploy on Vercel
+```bash
+cd pictobrickWebApp/frontend
+cp .env.example .env.local   # then fill in both Clerk keys
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Note: `npm run dev` reads `.env.local` from the `frontend/` directory — **not** from `pictobrickWebApp/.env.local` (that one is for Docker). You'll need both Clerk vars here:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+```
+
+## Authentication Model
+
+- **Provider:** Clerk (`@clerk/nextjs` v7) — wrapped around the app in `app/layout.tsx`.
+- **UI:** modal-based sign in / sign up, not dedicated pages. Buttons live in `components/Navbar.tsx`.
+- **Client-side checks:** use `useUser()` from `@clerk/nextjs` to read `isSignedIn` / user data.
+- **Route protection:** `middleware.ts` uses `createRouteMatcher` + `auth.protect()`. Currently only `/my-builds(.*)` is gated. Add paths to that matcher to require auth elsewhere.
+- **After sign-out redirect:** configured on `<ClerkProvider afterSignOutUrl="/" />` in `app/layout.tsx`.
+
+### Clerk v7 API notes
+
+The v7 API differs from older tutorials:
+- `<SignedIn>` / `<SignedOut>` are gone — use the `useUser()` hook or the `<Show when="signed-in">` server component.
+- `afterSignOutUrl` lives on `<ClerkProvider>`, not on `<UserButton>`.
+
+## Key Pages — Current Status
+
+| Route          | Status                                                                 |
+| -------------- | ---------------------------------------------------------------------- |
+| `/`            | Live. Hero + Live Rendering image + "how it works" steps.              |
+| `/create`      | Buttons all wired. "Generate Layout" currently **simulates** generation (1.5s timeout) and redirects to `/my-builds`. TODO: POST to FastAPI. |
+| `/my-builds`   | Auth-gated. Renders **placeholder** build data. TODO: fetch from FastAPI `GET /builds/mine`. |
+| `/gallery`     | Placeholder data (`SAMPLE_GALLERY` const).                             |
+| `/pricing`     | Static.                                                                |
+| `/faq`         | Static.                                                                |
+
+Search for `TODO:` in the `app/` folder to find the exact integration points.
+
+## Coding Conventions
+
+- All client components start with `"use client";`. Server components are the default.
+- Use `cn()` from `lib/utils.ts` for merging Tailwind classes on shadcn components.
+- Framer Motion (`framer-motion`) is used for small enter animations — stay consistent.
+- Icons: `lucide-react`.
+- Prefer shadcn `<Button>` / `<Card>` over raw elements where possible.
+
+## Env Vars Reference
+
+| Variable                              | Where it's read          | Notes                                       |
+| ------------------------------------- | ------------------------ | ------------------------------------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`   | Client JS bundle (build) | Must be present at `next build` time. Baked into `compose.yaml` for Docker. |
+| `CLERK_SECRET_KEY`                    | Server (middleware/API)  | Never commit. Loaded from `.env.local`.     |
+| `NEXT_PUBLIC_API_URL`                 | Client                   | FastAPI URL (host-reachable).               |
+| `FASTAPI_INTERNAL_URL`                | Server                   | FastAPI URL (in-compose network).           |
+| `DATABASE_URL`                        | Server                   | Postgres connection string.                 |
+| `REDIS_URL`                           | Server                   | Redis connection string.                    |
+
+## Common Gotchas
+
+- **Changed an env var and the app still behaves old?** Rebuild: `docker compose up --build`. `NEXT_PUBLIC_*` values are inlined at build time.
+- **TypeScript error about `SignedIn` not existing?** See the Clerk v7 notes above.
+- **X button on create-page thumbnails doesn't work?** Make sure any absolute overlay on the active thumbnail has `pointer-events-none`.
